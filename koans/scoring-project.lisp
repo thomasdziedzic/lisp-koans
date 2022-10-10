@@ -49,8 +49,38 @@
 ;;;
 ;;; Your goal is to write the scoring function for Greed.
 
+(defstruct rule
+  count1 points)
+
+(defun calculate-die-score (count1 rules)
+  (setq points-scored 0)
+  (setq count1-remaining count1)
+  (dolist (rule1 rules points-scored)
+    (multiple-value-bind (q r) (floor count1-remaining (rule-count1 rule1))
+      (incf points-scored (* q (rule-points rule1)))
+      (setf count1-remaining r)
+    )
+  )
+)
+
 (defun score (&rest dice)
-  ____)
+  (let
+    (
+      (count1-hash (make-hash-table))
+      (rules-hash (make-hash-table))
+    )
+    (dolist (die dice)
+      (setf (gethash die count1-hash) (1+ (gethash die count1-hash 0)))
+    )
+    (setf (gethash 1 rules-hash) (list (make-rule :count1 3 :points 1000) (make-rule :count1 1 :points 100)))
+    (setf (gethash 2 rules-hash) (list (make-rule :count1 3 :points 200)))
+    (setf (gethash 3 rules-hash) (list (make-rule :count1 3 :points 300)))
+    (setf (gethash 4 rules-hash) (list (make-rule :count1 3 :points 400)))
+    (setf (gethash 5 rules-hash) (list (make-rule :count1 3 :points 500) (make-rule :count1 1 :points 50)))
+    (setf (gethash 6 rules-hash) (list (make-rule :count1 3 :points 600)))
+    (loop for k being the hash-keys of count1-hash using (hash-value v) sum (calculate-die-score v (gethash k rules-hash)))
+  )
+)
 
 (define-test score-of-an-empty-list-is-zero
   (assert-equal 0 (score)))
