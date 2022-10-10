@@ -14,11 +14,37 @@
 
 (define-condition triangle-error (error)
   ;; Fill in the blank with a suitable slot definition.
-  (____))
+  ((sides :initarg :sides :reader triangle-error-sides)))
+
+(defun valid-triangle-sides (a b c)
+  (and
+    (< a (+ b c))
+    (< b (+ a c))
+    (< c (+ a b))
+  )
+)
 
 (defun triangle (a b c)
   ;; Fill in the blank with a function that satisfies the below tests.
-  ____)
+  (check-type a (real (0)))
+  (check-type b (real (0)))
+  (check-type c (real (0)))
+  (unless (valid-triangle-sides a b c) (error 'triangle-error :sides (list a b c)))
+  (let ((counts (make-hash-table)))
+    (dolist (side (list a b c))
+      (setf (gethash side counts) (1+ (gethash side counts 0)))
+    )
+    (let ((num-common-sides (max (gethash a counts) (gethash b counts) (gethash c counts))))
+      (if (= num-common-sides 3)
+        :equilateral
+        (if (= num-common-sides 2)
+          :isosceles
+          :scalene
+        )
+      )
+    )
+  )
+)
 
 (define-test equilateral-triangles
   ;; Equilateral triangles have three sides of equal length,
